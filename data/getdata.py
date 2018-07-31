@@ -14,7 +14,7 @@ file_path = os.path.dirname(os.path.realpath(__file__))
 #         import areajieba
 #         areajieba.initialize(dictjieba.area_dict)
 #         areajieba.load_userdict(dictjieba.area_user_dict)
-# 
+#
 #         from areajieba.analyse import extract_tags as area_extract_tags
 #         self.area_extract_tags = area_extract_tags
 
