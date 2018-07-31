@@ -17,7 +17,7 @@ class HierarchicalAttention(object):
         self.batch_size = tf.placeholder(tf.int32, [], name='batch_size')
         # self.input_y = tf.placeholder(tf.int32, [self.batch_size, self.config.class_num], name='input_y')
         self.init_weight()
-        self.logits = self.inference()
+        self.inference()
         # self.loss = self.classficatoin_text_loss(self.logits)
         # self.optim = self.classficatoin_text_train(self.loss)
         # self.accuracy = self.classficatoin_text_accuarcy(self.logits)
@@ -59,9 +59,9 @@ class HierarchicalAttention(object):
             hidden_state_sentence = tf.concat([hidden_state_forward_sentences, hidden_state_backward_sentences], axis=2)
             document_representation = self.sentence_attention(hidden_state_sentence)
 
-        logits = self.classficatoin_text_logits(sentence_representation)
+        # logits = self.classficatoin_text_logits(sentence_representation)
 
-        return logits
+        # return logits
 
     def gru_forward(self, input_x, name_variable):
         """
@@ -139,11 +139,11 @@ class HierarchicalAttention(object):
              expand dimension
              p_attention_expanded:shape [None, sequence_length, 1]
         """
-        p_attention_expanded = tf.expand_dims(p_attention, axis=2)
+        self.p_attention_expanded = tf.expand_dims(p_attention, axis=2)
         """
             add probability to hidden_state, shape:[batch_size*num_sentences,sequence_length,hidden_size*2]
         """
-        sentence_representation = tf.multiply(p_attention_expanded,
+        sentence_representation = tf.multiply(self.p_attention_expanded,
                                               hidden_state)
         """
             shape:[batch_size*num_sentences,hidden_size*2]

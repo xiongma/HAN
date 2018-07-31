@@ -26,7 +26,14 @@ class HAN_Train(object):
         :param words: words
         :return: words id
         """
-        return [self.word2vec_vocal_dict[word] for word in words]
+        words_id = []
+        for word in words:
+            try:
+                words_id.append(self.word2vec_vocal_dict[word])
+            except:
+                pass
+        return words_id
+        # return [self.word2vec_vocal_dict[word] for word in words]
 
     def train(self):
         """
@@ -37,11 +44,12 @@ class HAN_Train(object):
         news_content = [data[0] for data in news]
         content_cut = [self.tag_jieba.lcut(data) for data in news_content]
         dataset = [self.word_to_id(data) for data in content_cut]
-        X = kr.preprocessing.sequence.pad_sequences(dataset, self.han_config.sequence_length)
+        X = kr.preprocessing.sequence.pad_sequences(dataset,
+                                                    int(self.han_config.sequence_length / self.han_config.num_sentence))
 
         session = tf.Session()
-        session.run(tf.initialize_local_variables)
-        logits = session.run(self.han_model.logits,
+        session.run(tf.initialize_local_variables())
+        logits = session.run(self.han_model.p_attention_expanded,
                              feed_dict={self.han_model.batch_size: self.han_config.batch_size,
                                         self.han_model.learning_rate: self.han_config.learning_rate,
                                         self.han_model.input_x: X})

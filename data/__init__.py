@@ -23,4 +23,4 @@ class Education(object):
         # education news
         self.all_path = file_path + '\\ds\\education\\education_data.xls'
         self.normal_path = file_path + '\\ds\\education\\education_normal_data.xls'
-        self.garbage_path = file_path + '\\ds\\education\\education_garbage_data.xls'
+        self.garbage_path = file_path + '/ds/education/education_garbage_data.xls'
