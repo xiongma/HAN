@@ -6,17 +6,17 @@ import dictjieba
 
 file_path = os.path.dirname(os.path.realpath(__file__))
 
-class AreaJieba(object):
-    def __init__(self):
-        """
-        init area jieba
-        """
-        import areajieba
-        areajieba.initialize(dictjieba.area_dict)
-        areajieba.load_userdict(dictjieba.area_user_dict)
-
-        from areajieba.analyse import extract_tags as area_extract_tags
-        self.area_extract_tags = area_extract_tags
+# class AreaJieba(object):
+#     def __init__(self):
+#         """
+#         init area jieba
+#         """
+#         import areajieba
+#         areajieba.initialize(dictjieba.area_dict)
+#         areajieba.load_userdict(dictjieba.area_user_dict)
+# 
+#         from areajieba.analyse import extract_tags as area_extract_tags
+#         self.area_extract_tags = area_extract_tags
 
 class TagJieba(object):
     def __init__(self):
