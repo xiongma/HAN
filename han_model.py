@@ -8,11 +8,11 @@ class HierarchicalAttention(object):
         self.hidden_size = self.config.hidden_size
         self.gru_output_keep_prob = self.config.gru_output_keep_prob
         self.initializer = initializer # return Gaussian distribution initializer tensor
-        self.sequence_length = int(self.config.sequence_length / self.config.num_sentence)
         self.embedding = embedding
         self.embedding_size = len(embedding[0])
         # self.learning_rate_decay_half_op = tf.assign(self.learning_rate, self.learning_rate * 0.5)
-        self.input_x = tf.placeholder(tf.int32, [None, self.sequence_length], name='input_x')
+        self.input_x = tf.placeholder(tf.int32, [None, self.config.sequence_length], name='input_x')
+        self.sequence_length = int(self.config.sequence_length / self.config.num_sentence)
         self.learning_rate = tf.placeholder(tf.float32, name='learning_rate')
         self.batch_size = tf.placeholder(tf.int32, [], name='batch_size')
         # self.input_y = tf.placeholder(tf.int32, [self.batch_size, self.config.class_num], name='input_y')
@@ -29,8 +29,18 @@ class HierarchicalAttention(object):
         """
         # convert to embedding
         with tf.name_scope('word_embedding'):
-            input_x = tf.nn.embedding_lookup(self.embedding, self.input_x)
+            """
+            
+            """
+            input_x = tf.split(self.input_x, self.config.num_sentence, axis=1)
+            print(len(input_x))
+            print(input_x[0].shape)
+            input_x = tf.stack(input_x, axis=1)
+            print(input_x.shape)
+            input_x = tf.nn.embedding_lookup(self.embedding, input_x)
+            print(input_x.shape)
             input_x = tf.reshape(input_x, [-1, self.sequence_length, self.hidden_size])
+            print(input_x.shape)
 
         with tf.name_scope('word_forward'):
             hidden_state_forward_word, _ = self.gru_forward(input_x, "word_forward")
@@ -73,17 +83,16 @@ class HierarchicalAttention(object):
         with tf.variable_scope(name_variable):
             gru_cell = self.create_gru_unit()
 
-            # init unit state
-            gru_init_state = gru_cell.zero_state(self.batch_size*self.hidden_size*2, dtype=tf.float32)
+            # init unit state, this is able to init gru state ,each of data of batch need to be initializer, when train
+            gru_init_state = gru_cell.zero_state(self.batch_size*self.config.num_sentence, dtype=tf.float32)
+            outputs, state = tf.nn.dynamic_rnn(gru_cell, inputs=input_x, initial_state=gru_init_state)
 
-            outputs, state = tf.nn.dynamic_rnn(gru_cell, inputs=input_x, initial_state=gru_init_state,
-                                                         time_major=False)
         return outputs, state
 
     def gru_backward(self, input_x, name_variable):
         """
         GRU backward
-        :param input_x:shape:[None,sequence_length,embedding_size]
+        :param input_x:shape:[None*num_sentence, sequence_length, embedding_size]
         :param name_variable: name of gru variable
         :return:GRU backward outputs and every time step state
         """
