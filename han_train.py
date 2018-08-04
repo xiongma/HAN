@@ -49,11 +49,15 @@ class HAN_Train(object):
 
         session = tf.Session()
         session.run(tf.global_variables_initializer())
-        logits = session.run(self.han_model.p_attention_expanded,
+        # logits = session.run(self.han_model.p_attention,
+        #                      feed_dict={self.han_model.batch_size: self.han_config.batch_size,
+        #                                 self.han_model.learning_rate: self.han_config.learning_rate,
+        #                                 self.han_model.input_x: X})
+        # print(len(logits))
+        test = session.run(self.han_model.p_attention,
                              feed_dict={self.han_model.batch_size: self.han_config.batch_size,
                                         self.han_model.learning_rate: self.han_config.learning_rate,
                                         self.han_model.input_x: X})
-        print(logits)
-
+        print(test.shape)
 train = HAN_Train()
 train.train()
