@@ -2,7 +2,8 @@ import tensorflow as tf
 import tensorflow.contrib.keras as kr
 
 from news_w2v.news_vec import NewsW2V
-from data.getdata import TagJieba, DataProcess
+from data.getdata import DataProcess
+from tagjieba.instance import TagJieba
 
 from han_config import HierarchicalAttentionConfig
 from han_model import HierarchicalAttention

@@ -4,33 +4,9 @@ import xlrd
 import xlwt
 import dictjieba
 
+from tagjieba.instance import TagJieba
+
 file_path = os.path.dirname(os.path.realpath(__file__))
-
-# class AreaJieba(object):
-#     def __init__(self):
-#         """
-#         init area jieba
-#         """
-#         import areajieba
-#         areajieba.initialize(dictjieba.area_dict)
-#         areajieba.load_userdict(dictjieba.area_user_dict)
-#
-#         from areajieba.analyse import extract_tags as area_extract_tags
-#         self.area_extract_tags = area_extract_tags
-
-class TagJieba(object):
-    def __init__(self):
-        """
-        init tag jieba
-        """
-        import tagjieba
-        tagjieba.initialize(dictjieba.slda_tag_dict)
-
-        from tagjieba.analyse import extract_tags as tag_extract_tags
-        from tagjieba.analyse import set_stop_words as tag_set_stop_words
-        tag_set_stop_words(dictjieba.stop_dict)
-        self.tag_extract_tags = tag_extract_tags
-        self.lcut = tagjieba.lcut
 
 class DataProcess(object):
     def read_data(self, file_path):
