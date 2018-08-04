@@ -33,16 +33,16 @@ class HAN_Train(object):
                 words_id.append(self.word2vec_vocal_dict[word])
             except:
                 pass
+
         return words_id
-        # return [self.word2vec_vocal_dict[word] for word in words]
 
     def train(self):
         """
         this function is able train HAN model
         :return:
         """
-        news = self.dp.read_data(self.han_config.education.garbage_path)[:20]
-        news_content = [data[0] for data in news]
+        news = self.dp.read_data(self.han_config.education.garbage_path)[:32]
+        news_content = [data[1] for data in news]
         content_cut = [self.tag_jieba.lcut(data) for data in news_content]
         dataset = [self.word_to_id(data) for data in content_cut]
         X = kr.preprocessing.sequence.pad_sequences(dataset, self.han_config.sequence_length)

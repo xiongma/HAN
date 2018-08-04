@@ -29,18 +29,11 @@ class HierarchicalAttention(object):
         """
         # convert to embedding
         with tf.name_scope('word_embedding'):
-            """
-            
-            """
             input_x = tf.split(self.input_x, self.config.num_sentence, axis=1)
-            print(len(input_x))
-            print(input_x[0].shape)
             input_x = tf.stack(input_x, axis=1)
-            print(input_x.shape)
+
             input_x = tf.nn.embedding_lookup(self.embedding, input_x)
-            print(input_x.shape)
             input_x = tf.reshape(input_x, [-1, self.sequence_length, self.hidden_size])
-            print(input_x.shape)
 
         with tf.name_scope('word_forward'):
             hidden_state_forward_word, _ = self.gru_forward(input_x, "word_forward")
@@ -102,7 +95,7 @@ class HierarchicalAttention(object):
             gru_cell = self.create_gru_unit()
 
             # init unit state
-            gru_init_state = gru_cell.zero_state(self.batch_size*self.hidden_size*2, dtype=tf.float32)
+            gru_init_state = gru_cell.zero_state(self.batch_size*self.config.num_sentence, dtype=tf.float32)
             # run GRU backward
             outputs, state = tf.nn.dynamic_rnn(gru_cell, inputs=input_x, initial_state=gru_init_state)
             outputs = tf.reverse_v2(outputs, [1])
