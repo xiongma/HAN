@@ -152,6 +152,7 @@ class HierarchicalAttentionTrain(object):
                                                                self.han_model.input_y: y_val})
                         print(' f1 is {0}'.format(test_f1))
                         break
+
                     if epoch == self.han_config.epoch - 2:
                         test_f1 = session.run(self.han_model.F1,
                                               feed_dict={self.han_model.batch_size: self.han_config.batch_size,
