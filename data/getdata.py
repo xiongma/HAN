@@ -1,10 +1,8 @@
+
 import os
 import re
 import xlrd
 import xlwt
-import dictjieba
-
-from tagjieba.instance import TagJieba
 
 file_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -21,38 +19,17 @@ class DataProcess(object):
             sub_list = []
             title = sheet.cell_value(i, 0)
             content = sheet.cell_value(i, 1)
-            if title == '' or len(content) == 0:
+            label = sheet.cell_value(i, 2)
+            if title == '' or len(content) < 100:
                 continue
             title = self.regular_content(title)
             content = self.regular_content(content)
             sub_list.append(title)
             sub_list.append(content)
+            sub_list.append(label)
             data_list.append(sub_list)
 
         return data_list
-
-    def read_excel(self, file_path, label):
-        """
-        this function is able to read  regional political and normal news from all data excel
-        :param file_path: all data excel
-        :param label: data label, it's float
-        :return: data list
-        """
-        excel_file = xlrd.open_workbook(file_path)
-        sheet = excel_file.sheet_by_index(0)
-        data = []
-        for i in range(1, sheet.nrows):
-            sub_list = []
-            flag = sheet.cell_value(i, 3)
-            if flag == label:
-                title = sheet.cell_value(i, 1)
-                title = self.regular_content(title)
-                content = sheet.cell_value(i, 2)
-                if len(content) > 10:
-                    sub_list.append(title)
-                    sub_list.append(content)
-                    data.append(sub_list)
-        return data
 
     def regular_content(self, title):
         """
@@ -80,37 +57,6 @@ class DataProcess(object):
             c += 1
         book.save(file_name)
         print(c, 'save success....')
-
-    def reload_data(self, category):
-        """
-        this function is reload data when all data excel changed
-        :return:
-        """
-        if category == None:
-            print('category is None....')
-            return
-
-        garbage_news = self.read_excel(category.all_path, 1)
-        self.write_excel(category.garbage_path, garbage_news)
-        normal_news = self.read_excel(category.all_path, 0)
-        self.write_excel(category.normal_path, normal_news)
-
-    def political_reload_data(self, category):
-        """
-        this function is reload data when all data excel changed
-        :return:
-        """
-        if category == None:
-            print('category is None....')
-            return
-
-        garbage_news = self.read_excel(category.all_path, 1)
-        self.write_excel(category.garbage_path, garbage_news)
-        normal_news = self.read_excel(category.all_path, 0)
-        self.write_excel(category.normal_path, normal_news)
-        corruption_news = self.read_excel(category.all_path, 2)
-        self.write_excel(category.corruption_path, corruption_news)
-
 
 if __name__ == '__main__':
     dp = DataProcess()

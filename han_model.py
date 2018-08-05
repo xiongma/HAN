@@ -14,13 +14,13 @@ class HierarchicalAttention(object):
         self.sequence_length = int(self.config.sequence_length / self.config.num_sentence)
         self.learning_rate = tf.placeholder(tf.float32, name='learning_rate')
         self.batch_size = tf.placeholder(tf.int32, [], name='batch_size')
-        # self.input_y = tf.placeholder(tf.int32, [self.batch_size, self.config.class_num], name='input_y')
+        self.input_y = tf.placeholder(tf.int32, [None, self.config.class_num], name='input_y')
         self.init_weight()
-        self.inference()
-        # self.loss = self.classficatoin_text_loss(self.logits)
-        # self.optim = self.classficatoin_text_train(self.loss)
-        # self.accuracy = self.classficatoin_text_accuarcy(self.logits)
-        # self.F1 = self.classficatoin_text_f1(self.logits)
+        self.logits = self.inference()
+        self.loss = self.classficatoin_text_loss(self.logits)
+        self.optim = self.classficatoin_text_train(self.loss)
+        self.accuracy = self.classficatoin_text_accuarcy(self.logits)
+        self.F1 = self.classficatoin_text_f1(self.logits)
     def inference(self):
         """
         start HAN
@@ -66,9 +66,9 @@ class HierarchicalAttention(object):
                                                    axis=2)
             document_representation = self.sentence_attention(hidden_state_sentence)
 
-        # logits = self.classficatoin_text_logits(sentence_representation)
+        logits = self.classficatoin_text_logits(document_representation)
 
-        # return logits
+        return logits
 
     def gru_forward(self, input_x, zero_state_length, hidden_size, name_variable):
         """
@@ -208,12 +208,12 @@ class HierarchicalAttention(object):
             2) get possibility distribution for each word in the sentence.
             shape: [batch_size, num_sentence]
         """
-        self.p_attention = tf.nn.softmax(attention_logits - attention_logits_max)
+        p_attention = tf.nn.softmax(attention_logits - attention_logits_max)
         """
            # 3) get weighted hidden state by attention vector(sentence level)
            shape: [batch_size, num_sentence, 1] 
         """
-        p_attention_expanded = tf.expand_dims(self.p_attention, axis=2)
+        p_attention_expanded = tf.expand_dims(p_attention, axis=2)
         """
             multiply all representation
             shape:[batch_size, num_sentence, hidden_size*2]
@@ -236,6 +236,7 @@ class HierarchicalAttention(object):
         with tf.name_scope('softmax'):
             logits = tf.nn.softmax(tf.matmul(hidden_state, self.W_softmax) +
                                             self.B_softmax) # shape:[None,class_num]
+
         return logits
 
     def classficatoin_text_loss(self, logits):
@@ -272,8 +273,9 @@ class HierarchicalAttention(object):
         :return: f1 score
         """
         with tf.name_scope('f1'):
-            F1 = classification_report(tf.argmax(self.input_y, 1), tf.argmax(logits, 1))
-        return F1
+            f1 = classification_report(tf.argmax(self.input_y, 1), tf.argmax(logits, 1))
+
+        return f1
 
     def create_gru_unit(self, hidden_size):
         """
@@ -311,6 +313,6 @@ class HierarchicalAttention(object):
                                                             shape=[self.hidden_size * 2], initializer=self.initializer)
 
         with tf.name_scope('softmax_variable'):
-            self.W_softmax = tf.get_variable('W_softmax',shape=[self.hidden_size*2, self.config.class_num],
+            self.W_softmax = tf.get_variable('W_softmax', shape=[self.hidden_size*2, self.config.class_num],
                                                         initializer=self.initializer)
             self.B_softmax = tf.get_variable('B_softmax', shape=[self.config.class_num])
