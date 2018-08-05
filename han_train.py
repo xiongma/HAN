@@ -6,7 +6,7 @@ from sklearn.model_selection import train_test_split
 from keras.utils import to_categorical
 
 from news_w2v.news_vec import NewsW2V
-from data.getdata import DataProcess
+from data.get_data import DataProcess
 from tagjieba.instance import TagJieba
 
 from han_config import HierarchicalAttentionConfig
@@ -118,16 +118,17 @@ class HierarchicalAttentionTrain(object):
                                                             self.han_model.learning_rate: self.han_config.learning_rate,
                                                             self.han_model.input_x: X_val,
                                                             self.han_model.input_y: y_val})
+
                         if test_accuracy > best_accuracy:
                             best_accuracy = test_accuracy
                             last_improved = steps
                             saver.save(session, save_path=self.han_config.model_path)
 
+                        # early stop
                         if steps - last_improved > self.han_config.require_improved:
                             print("No optimization for a long time, auto-stopping...")
                             early_stop = True
                             break
-
 
                         print('{0} train accuracy is {1}, train loss is {2}'.format(steps, train_accuracy,
                                                                                     train_loss))
@@ -144,7 +145,20 @@ class HierarchicalAttentionTrain(object):
                     steps = steps + 1
 
                     if early_stop:
+                        test_f1 = session.run(self.han_model.F1,
+                                                    feed_dict={self.han_model.batch_size: self.han_config.batch_size,
+                                                               self.han_model.learning_rate: self.han_config.learning_rate,
+                                                               self.han_model.input_x: X_val,
+                                                               self.han_model.input_y: y_val})
+                        print(' f1 is {0}'.format(test_f1))
                         break
+                    if epoch == self.han_config.epoch - 2:
+                        test_f1 = session.run(self.han_model.F1,
+                                              feed_dict={self.han_model.batch_size: self.han_config.batch_size,
+                                                         self.han_model.learning_rate: self.han_config.learning_rate,
+                                                         self.han_model.input_x: X_val,
+                                                         self.han_model.input_y: y_val})
+                        print(' f1 is {0}'.format(test_f1))
 
 train = HierarchicalAttentionTrain()
 train.train()
