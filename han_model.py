@@ -308,7 +308,7 @@ class HierarchicalAttention(object):
             self.W_b_attention_word = tf.get_variable('W_b_attention_word',
                                                       shape=[self.hidden_size * 2],
                                                       initializer=self.initializer)
-            self.context_vector_word = tf.get_variable("what_is_the_informative_word", shape=[self.hidden_size * 2],
+            self.context_vector_word = tf.get_variable("what_is_the_information_word", shape=[self.hidden_size * 2],
                                                         initializer=self.initializer)
 
             self.W_w_attention_sentence = tf.get_variable('W_w_attention_sentence',
