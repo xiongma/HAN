@@ -1,7 +1,10 @@
+import numpy as np
+
 import tensorflow as tf
 import tensorflow.contrib.keras as kr
 
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import classification_report
 
 from keras.utils import to_categorical
 
@@ -65,7 +68,7 @@ class HierarchicalAttentionTrain(object):
         :return:
         """
         # get data
-        news = self.dp.read_data(self.han_config.education.garbage_path)
+        news = self.dp.read_data(self.han_config.advertising.all_path)
         news_content = [data[1] for data in news]
         news_label = [data[2] for data in news]
 
@@ -75,11 +78,12 @@ class HierarchicalAttentionTrain(object):
         # data set to id and padding immobilization sequence length
         dataset = [self.word_to_id(data) for data in content_cut]
         X = kr.preprocessing.sequence.pad_sequences(dataset, self.han_config.sequence_length)
-        y = to_categorical(news_label)
+        y = to_categorical(news_label, num_classes=self.han_config.class_num)
 
         # split data set
-        X_train, X_val, y_train, y_val = train_test_split(X, y, 1-self.han_config.train_rate)
+        X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=1-self.han_config.train_rate)
 
+        # train params
         steps = 0
         best_accuracy = 0
         last_improved = 0
@@ -91,7 +95,7 @@ class HierarchicalAttentionTrain(object):
         with tf.Session() as session:
             session.run(tf.global_variables_initializer())
             for epoch in range(self.han_config.epoch):
-                batch_iterate = self.batch_iter(X_train, y_train)
+                batch_iterate = self.batch_iter(X_train, y_train, self.han_config.batch_size)
 
                 for input_x, input_y in batch_iterate:
                     train_accuracy = session.run(self.han_model.accuracy,
@@ -145,21 +149,25 @@ class HierarchicalAttentionTrain(object):
                     steps = steps + 1
 
                     if early_stop:
-                        test_f1 = session.run(self.han_model.F1,
+                        logits = session.run(self.han_model.logits,
                                                     feed_dict={self.han_model.batch_size: self.han_config.batch_size,
                                                                self.han_model.learning_rate: self.han_config.learning_rate,
                                                                self.han_model.input_x: X_val,
                                                                self.han_model.input_y: y_val})
-                        print(' f1 is {0}'.format(test_f1))
-                        break
+
+                        print(' f1 is {0}'.format(classification_report(np.argmax(y_val, axis=1),
+                                                                        np.argmax(logits, axis=1))))
+                        return
 
                     if epoch == self.han_config.epoch - 2:
-                        test_f1 = session.run(self.han_model.F1,
+                        logits = session.run(self.han_model.logits,
                                               feed_dict={self.han_model.batch_size: self.han_config.batch_size,
                                                          self.han_model.learning_rate: self.han_config.learning_rate,
                                                          self.han_model.input_x: X_val,
                                                          self.han_model.input_y: y_val})
-                        print(' f1 is {0}'.format(test_f1))
+
+                        print(' f1 is {0}'.format(classification_report(np.argmax(y_val, axis=1),
+                                                                        np.argmax(logits, axis=1))))
 
 train = HierarchicalAttentionTrain()
 train.train()

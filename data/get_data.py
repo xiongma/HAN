@@ -3,6 +3,7 @@ import os
 import re
 import xlrd
 import xlwt
+import pandas as pd
 
 file_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -31,6 +32,17 @@ class DataProcess(object):
 
         return data_list
 
+    def read_data_1(self, file_path):
+        """
+        this function is able to read news from excel
+        :param file_path: file path
+        :return: pandas data frame
+        """
+        data_frame = pd.read_excel(file_path)
+        data_frame.columns = ['id', 'title', 'content']
+
+        return data_frame
+
     def regular_content(self, title):
         """
         this function is able to regular content
@@ -41,22 +53,6 @@ class DataProcess(object):
         title = re.sub('|', '', title)
 
         return title
-
-    def write_excel(self, file_name, data):
-        """
-        this function is able to save data to excel
-        :param data: data list
-        :return:
-        """
-        book = xlwt.Workbook()
-        sheet = book.add_sheet('sheet1')
-        c = 0
-        for d in data:
-            for index in range(len(d)):
-                sheet.write(c, index, d[index])
-            c += 1
-        book.save(file_name)
-        print(c, 'save success....')
 
 if __name__ == '__main__':
     dp = DataProcess()
