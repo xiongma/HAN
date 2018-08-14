@@ -160,7 +160,7 @@ class HierarchicalAttention(object):
                                               hidden_state)
         """
             shape:[batch_size*num_sentences,hidden_size*2]
-            一篇文章分成了几句话，每句话都有相同长度的词，这里的含义相当于，将所有的句子归结为一句话，所以这里要相加
+            一篇文章分成了几句话，每句话都有相同长度的词，这里的含义相当于，将所有的句子归结为一句话，所以这里要相加,上下文向量
         """
         sentence_representation = tf.reduce_sum(sentence_representation, axis=1)
 
