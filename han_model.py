@@ -1,7 +1,5 @@
 import tensorflow as tf
 from tensorflow.contrib import rnn
-from sklearn.metrics import classification_report
-
 
 class HierarchicalAttention(object):
     def __init__(self, config, embedding, initializer=tf.random_normal_initializer(stddev=0.1)):
@@ -92,9 +90,9 @@ class HierarchicalAttention(object):
     def gru_backward(self, input_x, zero_state_length, hidden_size, name_variable):
         """
         GRU backward
-        :param input_x:shape:[None*num_sentence, sequence_length, embedding_size]
-        :param zero_state_length: gre cell zero state size
-        :param hidden_size: gre output hidden size
+        :param input_x:shape:[batch_size*num_sentence, sequence_length, embedding_size]
+        :param zero_state_length: gru cell zero state size
+        :param hidden_size: gru output hidden size
         :param name_variable: name of gru variable
         :return:GRU backward outputs and every time step state
         """
@@ -104,9 +102,10 @@ class HierarchicalAttention(object):
 
             # init unit state
             gru_init_state = gru_cell.zero_state(zero_state_length, dtype=tf.float32)
+
             # run GRU backward
             outputs, state = tf.nn.dynamic_rnn(gru_cell, inputs=input_x, initial_state=gru_init_state)
-            outputs = tf.reverse_v2(outputs, [1])
+            outputs = tf.reverse_v2(outputs, axis=[1])
         return outputs, state
 
     def word_attention(self, hidden_state):
@@ -214,12 +213,12 @@ class HierarchicalAttention(object):
            # 3) get weighted hidden state by attention vector(sentence level)
            shape: [batch_size, num_sentence, 1] 
         """
-        self.p_attention_expanded = tf.expand_dims(p_attention, axis=2)
+        p_attention_expanded = tf.expand_dims(p_attention, axis=2)
         """
             multiply all representation
             shape:[batch_size, num_sentence, hidden_size*4]
         """
-        sentence_representation = tf.multiply(self.p_attention_expanded, hidden_state)
+        sentence_representation = tf.multiply(p_attention_expanded, hidden_state)
         """
             get sum
             shape:[batch_size, hidden_size*4]

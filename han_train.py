@@ -8,6 +8,8 @@ from sklearn.metrics import classification_report
 
 from keras.utils import to_categorical
 
+import pandas as pd
+
 from news_w2v.news_vec import NewsW2V
 from data.get_data import DataProcess
 from tagjieba.instance import TagJieba
@@ -46,15 +48,16 @@ class HierarchicalAttentionTrain(object):
 
         return words_id
 
-    def batch_iter(self, X, y, batch_size):
+    def batch_iter(self, X, y, batch_size=32):
         """
         this function is able to get batch iterate of total data set
         :param X: X
         :param y: y
-        :param batch_size: batch size
+        :param batch_size: batch size, default 32
         :return: batch iterate
         """
         data_len = len(X)
+
         num_batch = int((data_len - 1) / batch_size) + 1
         for i in range(num_batch):
             start_id = i * batch_size
@@ -68,9 +71,10 @@ class HierarchicalAttentionTrain(object):
         :return:
         """
         # get data
-        news = self.dp.read_data(self.han_config.advertising.all_path)
-        news_content = [data[1] for data in news]
-        news_label = [data[2] for data in news]
+        news = np.array(pd.read_excel(self.han_config.advertising.all_path)).tolist()[:800]
+        # news = self.dp.read_data(self.han_config.advertising.all_path)
+        news_content = [data[2] for data in news]
+        news_label = [data[3]-1 for data in news]
 
         # cut content
         content_cut = [self.tag_jieba.lcut(data) for data in news_content]
@@ -92,7 +96,12 @@ class HierarchicalAttentionTrain(object):
         # model saver
         saver = tf.train.Saver()
 
-        with tf.Session() as session:
+        # definition GPU
+        config = tf.ConfigProto()
+        config.gpu_options.per_process_gpu_memory_fraction = 0.9
+
+        # start train
+        with tf.Session(config=config) as session:
             session.run(tf.global_variables_initializer())
             for epoch in range(self.han_config.epoch):
                 batch_iterate = self.batch_iter(X_train, y_train, self.han_config.batch_size)
@@ -169,5 +178,6 @@ class HierarchicalAttentionTrain(object):
                         print(' f1 is {0}'.format(classification_report(np.argmax(y_val, axis=1),
                                                                         np.argmax(logits, axis=1))))
 
-train = HierarchicalAttentionTrain()
-train.train()
+if __name__ == "__main__":
+    train = HierarchicalAttentionTrain()
+    train.train()
