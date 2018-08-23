@@ -14,7 +14,7 @@ class Political(object):
 class Advertising(object):
     def __init__(self):
         # advertising news
-        self.all_path = file_path + '\\ds\\advertising\\advertising_data.xls'
+        self.all_path = file_path + '/ds/advertising/advertising_data.xls'
         self.normal_path = file_path + '\\ds\\advertising\\advertising_normal_data.xls'
         self.garbage_path = file_path + '\\ds\\advertising\\advertising_garbage_data.xls'
 

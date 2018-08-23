@@ -8,12 +8,13 @@ class HierarchicalAttention(object):
         self.gru_output_keep_prob = self.config.gru_output_keep_prob
         self.initializer = initializer  # return Gaussian distribution initializer tensor
         self.embedding = embedding
-        # self.learning_rate_decay_half_op = tf.assign(self.learning_rate, self.learning_rate * 0.5)
-        self.input_x = tf.placeholder(tf.int32, [None, self.config.sequence_length], name='input_x')
-        self.sequence_length = int(self.config.sequence_length / self.config.num_sentence)
+        self.each_sentence_sequence_length = int(self.config.sentence_length / self.config.num_sentence)
+
         self.learning_rate = tf.placeholder(tf.float32, name='learning_rate')
-        self.batch_size = tf.placeholder(tf.int32, [], name='batch_size')
+        self.batch_size = tf.constant(config.batch_size, name='batch_size')
+        self.input_x = tf.placeholder(tf.int32, [None, self.config.sentence_length], name='input_x')
         self.input_y = tf.placeholder(tf.int32, [None, self.config.class_num], name='input_y')
+
         self.init_weight()
         self.logits = self.inference()
         self.loss = self.classficatoin_text_loss(self.logits)
@@ -31,13 +32,15 @@ class HierarchicalAttention(object):
             input_x = tf.stack(input_x, axis=1)
 
             input_x = tf.nn.embedding_lookup(self.embedding, input_x)
-            input_x = tf.reshape(input_x, [-1, self.sequence_length, self.hidden_size])
+            input_x = tf.reshape(input_x, [-1, self.each_sentence_sequence_length, self.hidden_size])
 
         with tf.name_scope('word_forward'):
-            hidden_state_forward_word, _ = self.gru_forward(input_x, self.batch_size * self.config.num_sentence,
+            hidden_state_forward_word, _ = self.gru_forward(input_x, self.batch_size,
                                                             self.config.hidden_size, "word_forward")
+            self.hidden_state_forward_word_ = hidden_state_forward_word
+
         with tf.name_scope('word_backward'):
-            hidden_state_backward_word, _ = self.gru_backward(input_x, self.batch_size * self.config.num_sentence,
+            hidden_state_backward_word, _ = self.gru_backward(input_x, self.batch_size,
                                                               self.config.hidden_size, "word_backward")
 
         """
@@ -79,10 +82,11 @@ class HierarchicalAttention(object):
         :return: GRU forward outputs and every time step state
         """
         with tf.variable_scope(name_variable):
-            gru_cell = self.create_gru_unit(hidden_size)
+            gru_cell = self.create_gru_unit(hidden_size, 'gru_forward')
 
             # init unit state, this is able to init gru state ,each of data of batch need to be initializer, when train
             gru_init_state = gru_cell.zero_state(zero_state_length, dtype=tf.float32)
+
             outputs, state = tf.nn.dynamic_rnn(gru_cell, inputs=input_x, initial_state=gru_init_state)
 
         return outputs, state
@@ -98,7 +102,7 @@ class HierarchicalAttention(object):
         """
         with tf.variable_scope(name_variable):
             input_x = tf.reverse_v2(input_x, axis=[1])
-            gru_cell = self.create_gru_unit(hidden_size)
+            gru_cell = self.create_gru_unit(hidden_size, 'gru_backward')
 
             # init unit state
             gru_init_state = gru_cell.zero_state(zero_state_length, dtype=tf.float32)
@@ -125,7 +129,7 @@ class HierarchicalAttention(object):
         """
             hidden_representation:shape [batch_size*num_sentence, sequence_length, hidden_size*2]
         """
-        hidden_representation = tf.reshape(hidden_representation, [-1, self.sequence_length, self.hidden_size * 2])
+        hidden_representation = tf.reshape(hidden_representation, [-1, self.each_sentence_sequence_length, self.hidden_size * 2])
         """
             hidden_state_context_similiarity:shape [batch_size*num_sentence, sequence_length, hidden_size*2]
         """
@@ -244,7 +248,7 @@ class HierarchicalAttention(object):
         :return: loss
         """
         with tf.name_scope('loss'):
-            loss = tf.nn.softmax_cross_entropy_with_logits_v2(logits=logits, labels=self.input_y)
+            loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=logits, labels=self.input_y))
         return loss
 
     def classficatoin_text_train(self, loss):
@@ -267,13 +271,14 @@ class HierarchicalAttention(object):
 
         return accuracy
 
-    def create_gru_unit(self, hidden_size):
+    def create_gru_unit(self, hidden_size, name_scope=None):
         """
         create gru unit
         :param hidden_size: GRU output hidden_size
+        :param name_scope: GRU name scope
         :return: GRU cell
         """
-        with tf.name_scope('create_gru_cell'):
+        with tf.name_scope(name_scope):
             gru_cell = rnn.GRUCell(hidden_size)
             gru_cell = rnn.DropoutWrapper(cell=gru_cell, input_keep_prob=1.0,
                                           output_keep_prob=self.gru_output_keep_prob)

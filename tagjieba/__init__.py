@@ -62,7 +62,7 @@ class Tokenizer(object):
         self.total = 0
         self.user_word_tag_tab = {}
         self.initialized = False
-        self.tmp_dir = r'F:\\'
+        self.tmp_dir = r'/tmp'
         self.cache_file = None
 
     def __repr__(self):
