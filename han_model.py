@@ -28,20 +28,16 @@ class HierarchicalAttention(object):
         """
         # convert to embedding
         with tf.name_scope('word_embedding'):
-            input_x = tf.split(self.input_x, self.config.num_sentence, axis=1)
+            input_x = tf.split(self.input_x, num_or_size_splits=self.config.num_sentence, axis=1)
             input_x = tf.stack(input_x, axis=1)
-
             input_x = tf.nn.embedding_lookup(self.embedding, input_x)
             input_x = tf.reshape(input_x, [-1, self.each_sentence_sequence_length, self.hidden_size])
 
         with tf.name_scope('word_forward'):
-            hidden_state_forward_word, _ = self.gru_forward(input_x, self.batch_size,
-                                                            self.config.hidden_size, "word_forward")
-            self.hidden_state_forward_word_ = hidden_state_forward_word
+            hidden_state_forward_word, _ = self.gru_forward(input_x, self.hidden_size, "word_forward")
 
         with tf.name_scope('word_backward'):
-            hidden_state_backward_word, _ = self.gru_backward(input_x, self.batch_size,
-                                                              self.config.hidden_size, "word_backward")
+            hidden_state_backward_word, _ = self.gru_backward(input_x, self.hidden_size, "word_backward")
 
         """
             concat forwards and backwards output,its hidden size will be 2*hidden_size
@@ -54,11 +50,11 @@ class HierarchicalAttention(object):
                                                                          self.hidden_size * 2])
         # Sentence Attention
         with tf.name_scope('sentence_forward'):
-            hidden_state_forward_sentences, _ = self.gru_forward(word_representation, self.batch_size,
-                                                                 self.hidden_size * 2, "sentence_forward")
+            hidden_state_forward_sentences, _ = self.gru_forward(word_representation, self.hidden_size * 2,
+                                                                 "sentence_forward")
         with tf.name_scope('sentence_backward'):
-            hidden_state_backward_sentences, _ = self.gru_backward(word_representation, self.batch_size,
-                                                                   self.hidden_size * 2, "sentence_backward")
+            hidden_state_backward_sentences, _ = self.gru_backward(word_representation, self.hidden_size * 2,
+                                                                   "sentence_backward")
 
         """
             concat forwards and backwards output,its hidden size will be 4*hidden_size
@@ -72,11 +68,10 @@ class HierarchicalAttention(object):
 
         return logits
 
-    def gru_forward(self, input_x, zero_state_length, hidden_size, name_variable):
+    def gru_forward(self, input_x, hidden_size, name_variable):
         """
         GRU forward
         :param input_x:shape: [batch_size*num_sentence,sequence_length,embedding_size]
-        :param zero_state_length: gre cell zero state size
         :param hidden_size: gru output hidden size
         :param name_variable: name of gru variable
         :return: GRU forward outputs and every time step state
@@ -85,17 +80,17 @@ class HierarchicalAttention(object):
             gru_cell = self.create_gru_unit(hidden_size, 'gru_forward')
 
             # init unit state, this is able to init gru state ,each of data of batch need to be initializer, when train
+            zero_state_length = tf.shape(input_x)[0]
             gru_init_state = gru_cell.zero_state(zero_state_length, dtype=tf.float32)
 
             outputs, state = tf.nn.dynamic_rnn(gru_cell, inputs=input_x, initial_state=gru_init_state)
 
         return outputs, state
 
-    def gru_backward(self, input_x, zero_state_length, hidden_size, name_variable):
+    def gru_backward(self, input_x, hidden_size, name_variable):
         """
         GRU backward
         :param input_x:shape:[batch_size*num_sentence, sequence_length, embedding_size]
-        :param zero_state_length: gru cell zero state size
         :param hidden_size: gru output hidden size
         :param name_variable: name of gru variable
         :return:GRU backward outputs and every time step state
@@ -105,6 +100,7 @@ class HierarchicalAttention(object):
             gru_cell = self.create_gru_unit(hidden_size, 'gru_backward')
 
             # init unit state
+            zero_state_length = tf.shape(input_x)[0]
             gru_init_state = gru_cell.zero_state(zero_state_length, dtype=tf.float32)
 
             # run GRU backward
@@ -271,15 +267,15 @@ class HierarchicalAttention(object):
 
         return accuracy
 
-    def create_gru_unit(self, hidden_size, name_scope=None):
+    def create_gru_unit(self, gru_hidden_size, name_scope=None):
         """
         create gru unit
-        :param hidden_size: GRU output hidden_size
+        :param gru_hidden_size: GRU output hidden_size
         :param name_scope: GRU name scope
         :return: GRU cell
         """
         with tf.name_scope(name_scope):
-            gru_cell = rnn.GRUCell(hidden_size)
+            gru_cell = rnn.GRUCell(gru_hidden_size)
             gru_cell = rnn.DropoutWrapper(cell=gru_cell, input_keep_prob=1.0,
                                           output_keep_prob=self.gru_output_keep_prob)
 

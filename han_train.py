@@ -107,12 +107,12 @@ class HierarchicalAttentionTrain(object):
                 batch_iterate = self.batch_iter(X_train, y_train, self.han_config.batch_size)
 
                 for input_x, input_y in batch_iterate:
-                    train_accuracy = session.run(self.han_model.hidden_state_forward_word_,
+                    train_accuracy = session.run(self.han_model.accuracy,
                             feed_dict={
                                         self.han_model.learning_rate: self.han_config.learning_rate,
                                         self.han_model.input_x: input_x,
                                         self.han_model.input_y: input_y})
-                    print(train_accuracy.shape)
+                    # print(train_accuracy.shape)
 
                     train_loss = session.run(self.han_model.loss,
                             feed_dict={
