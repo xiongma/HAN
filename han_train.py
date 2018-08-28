@@ -93,16 +93,16 @@ class HierarchicalAttentionTrain(object):
         last_improved = 0
         early_stop = False
 
-        # model saver
-        # saver = tf.train.Saver()
+        saver = tf.train.Saver()
 
         # definition GPU
-        #config = tf.ConfigProto()
-        #config.gpu_options.per_process_gpu_memory_fraction = 0.9
+        config = tf.ConfigProto(allow_soft_placement=True)
+        config.gpu_options.per_process_gpu_memory_fraction = 0.9
 
         # start train
-        with tf.Session() as session:
+        with tf.Session(config=config) as session:
             session.run(tf.global_variables_initializer())
+
             for epoch in range(self.han_config.epoch):
                 batch_iterate = self.batch_iter(X_train, y_train, self.han_config.batch_size)
 
@@ -136,13 +136,20 @@ class HierarchicalAttentionTrain(object):
                         if test_accuracy > best_accuracy:
                             best_accuracy = test_accuracy
                             last_improved = steps
-                            # saver.save(session, save_path=self.han_config.model_path)
+                            saver.save(session, save_path=self.han_config.model_path)
 
                         # early stop
                         if steps - last_improved > self.han_config.require_improved:
                             print("No optimization for a long time, auto-stopping...")
-                            early_stop = True
-                            break
+                            logits = session.run(self.han_model.logits,
+                                                 feed_dict={
+                                                     self.han_model.learning_rate: self.han_config.learning_rate,
+                                                     self.han_model.input_x: X_val,
+                                                     self.han_model.input_y: y_val})
+
+                            print(' f1 is {0}'.format(classification_report(np.argmax(y_val, axis=1),
+                                                                            np.argmax(logits, axis=1))))
+                            return
 
                         print('{0} train accuracy is {1}, train loss is {2}'.format(steps, train_accuracy,
                                                                                     train_loss))
@@ -157,17 +164,6 @@ class HierarchicalAttentionTrain(object):
                                            self.han_model.input_y: input_y})
 
                     steps = steps + 1
-
-                    if early_stop:
-                        logits = session.run(self.han_model.logits,
-                                                    feed_dict={
-                                                               self.han_model.learning_rate: self.han_config.learning_rate,
-                                                               self.han_model.input_x: X_val,
-                                                               self.han_model.input_y: y_val})
-
-                        print(' f1 is {0}'.format(classification_report(np.argmax(y_val, axis=1),
-                                                                        np.argmax(logits, axis=1))))
-                        return
 
                     if epoch == self.han_config.epoch - 2:
                         logits = session.run(self.han_model.logits,
