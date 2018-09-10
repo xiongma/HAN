@@ -48,11 +48,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="han_train.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="han_train.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/han_train.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="187">
-              <caret line="49" selection-start-line="49" selection-end-line="49" />
+            <state relative-caret-position="238">
+              <caret line="73" column="67" selection-start-line="73" selection-start-column="67" selection-end-line="73" selection-end-column="67" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
                 <element signature="e#534#1151#0" />
@@ -72,11 +72,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="han_config.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="han_config.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/han_config.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="349">
-              <caret line="30" column="40" lean-forward="true" selection-start-line="30" selection-start-column="40" selection-end-line="30" selection-end-column="40" />
+            <state relative-caret-position="187">
+              <caret line="12" column="30" selection-start-line="12" selection-start-column="30" selection-end-line="12" selection-end-column="30" />
             </state>
           </provider>
         </entry>
@@ -119,8 +119,8 @@
         <option value="$PROJECT_DIR$/tagjieba/__init__.py" />
         <option value="$PROJECT_DIR$/test.py" />
         <option value="$PROJECT_DIR$/news_w2v/news_vec.py" />
-        <option value="$PROJECT_DIR$/han_train.py" />
         <option value="$PROJECT_DIR$/han_config.py" />
+        <option value="$PROJECT_DIR$/han_train.py" />
       </list>
     </option>
   </component>
@@ -130,7 +130,7 @@
     <detection-done>true</detection-done>
     <sorting>DEFINITION_ORDER</sorting>
   </component>
-  <component name="ProjectFrameBounds" extendedState="6">
+  <component name="ProjectFrameBounds" extendedState="7">
     <option name="y" value="23" />
     <option name="width" value="1440" />
     <option name="height" value="797" />
@@ -543,26 +543,9 @@
     <entry file="file://$PROJECT_DIR$/README.md" />
     <entry file="file://$USER_HOME$/Software/anaconda3/lib/python3.6/tempfile.py" />
     <entry file="file://$USER_HOME$/Software/anaconda3/lib/python3.6/site-packages/sklearn/model_selection/_split.py" />
-    <entry file="file://$PROJECT_DIR$/han_model_bak.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-867">
-          <caret line="3" selection-start-line="2" selection-start-column="49" selection-end-line="3" />
-          <folding>
-            <element signature="e#0#23#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://C:/ProgramData/Anaconda3/Lib/site-packages/xlrd/book.py" />
     <entry file="file://C:/ProgramData/Anaconda3/Lib/site-packages/tensorflow/python/ops/rnn_cell_impl.py" />
     <entry file="file://C:/ProgramData/Anaconda3/Lib/site-packages/tensorflow/python/ops/control_flow_ops.py" />
-    <entry file="file://$PROJECT_DIR$/data/get_data.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="544">
-          <caret line="36" column="34" selection-start-line="36" selection-start-column="34" selection-end-line="36" selection-end-column="34" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/Software/anaconda3/lib/python3.6/site-packages/tensorflow/python/ops/rnn_cell_impl.py" />
     <entry file="file://$USER_HOME$/Software/anaconda3/lib/python3.6/site-packages/tensorflow/python/eager/context.py" />
     <entry file="file://$USER_HOME$/Software/anaconda3/lib/python3.6/site-packages/tensorflow/python/framework/ops.py" />
@@ -640,6 +623,13 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/news_w2v/__init__.py" />
     <entry file="file://$PROJECT_DIR$/news_w2v/news_vec.py" />
+    <entry file="file://$PROJECT_DIR$/data/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="170">
+          <caret line="10" column="85" selection-start-line="10" selection-start-column="85" selection-end-line="10" selection-end-column="85" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/han_model.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="153">
@@ -656,30 +646,40 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/data/__init__.py">
+    <entry file="file://$PROJECT_DIR$/han_model_bak.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="170">
-          <caret line="10" column="85" selection-start-line="10" selection-start-column="85" selection-end-line="10" selection-end-column="85" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/han_train.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="187">
-          <caret line="49" selection-start-line="49" selection-end-line="49" />
+        <state relative-caret-position="-867">
+          <caret line="3" selection-start-line="2" selection-start-column="49" selection-end-line="3" />
           <folding>
-            <element signature="e#0#18#0" expanded="true" />
-            <element signature="e#534#1151#0" />
-            <element signature="e#1194#1525#0" />
-            <element signature="e#1579#2044#0" />
+            <element signature="e#0#23#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/han_config.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="349">
-          <caret line="30" column="40" lean-forward="true" selection-start-line="30" selection-start-column="40" selection-end-line="30" selection-end-column="40" />
+        <state relative-caret-position="187">
+          <caret line="12" column="30" selection-start-line="12" selection-start-column="30" selection-end-line="12" selection-end-column="30" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/data/get_data.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="544">
+          <caret line="36" column="34" selection-start-line="36" selection-start-column="34" selection-end-line="36" selection-end-column="34" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/han_train.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="238">
+          <caret line="73" column="67" selection-start-line="73" selection-start-column="67" selection-end-line="73" selection-end-column="67" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+            <element signature="e#534#1151#0" />
+            <element signature="e#1194#1525#0" />
+            <element signature="e#1579#2044#0" />
+          </folding>
         </state>
       </provider>
     </entry>

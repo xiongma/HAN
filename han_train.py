@@ -71,8 +71,8 @@ class HierarchicalAttentionTrain(object):
         :return:
         """
         # get data
-        news = np.array(pd.read_excel(self.han_config.advertising.all_path)).tolist()[:800]
-        # news = self.dp.read_data(self.han_config.advertising.all_path)
+        news = np.array(pd.read_excel(self.han_config.data_set_path)).tolist()[:800]
+
         news_content = [data[2] for data in news]
         news_label = [data[3]-1 for data in news]
 

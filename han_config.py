@@ -10,7 +10,7 @@ class HierarchicalAttentionConfig(object):
         self.num_sentence = 10 # num sentence in documents
         self.sentence_length = 100 # sequence length of each sentence
         self.hidden_size = 300
-        self.advertising = data.Advertising()
+        self.data_set_path = ''
         self.gru_output_keep_prob = 0.5
         self.class_num = 2
         self.batch_size = 8
