@@ -18,5 +18,15 @@ class HierarchicalAttentionConfig(object):
         self.train_rate = 0.8 # this is train data set rate of total data set
         self.num_train = 5 # how many number display train accuracy
         self.require_improved = 100
+
+        if os.path.exists(file_path + '/model'):
+            print('model path exist....')
+        else:
+            os.mkdir(file_path + '/model/')
         self.model_path = file_path + '/model/HAN.ckpt'
+
+        if os.path.exists(file_path + '/log'):
+            print('log path exist....')
+        else:
+            os.mkdir(file_path + '/log')
         self.log_path = file_path + '/log'
