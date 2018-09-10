@@ -91,8 +91,8 @@ class HierarchicalAttentionTrain(object):
         steps = 0
         best_accuracy = 0
         last_improved = 0
-        early_stop = False
 
+        # model saver
         saver = tf.train.Saver()
 
         # definition GPU
@@ -101,37 +101,62 @@ class HierarchicalAttentionTrain(object):
 
         # start train
         with tf.Session(config=config) as session:
+            # init global variables
             session.run(tf.global_variables_initializer())
+
+            # train log
+            writer = tf.summary.FileWriter(logdir=self.han_config.log_path, graph=session.graph)
+
+            # define test summary
+            test_accuracy_summary = tf.summary.scalar('test_accuracy', self.han_model.accuracy)
+            test_loss_summary = tf.summary.scalar('test_loss', self.han_model.loss)
+            test_scalar = tf.summary.merge([test_accuracy_summary, test_loss_summary])
+            # define train summary
+            train_accuracy_summary = tf.summary.scalar('train_accuracy', self.han_model.accuracy)
+            train_loss_summary = tf.summary.scalar('train_loss', self.han_model.loss)
+            train_scalar = tf.summary.merge([train_accuracy_summary, train_loss_summary])
+            # define all variable
+            W_w_attention_word_histogram = tf.summary.histogram('W_w_attention_word', self.han_model.W_w_attention_word)
+            W_b_attention_word_histogram = tf.summary.histogram('W_w_attention_word', self.han_model.W_b_attention_word)
+            context_vecotor_word_histogram = tf.summary.histogram('context_vecotor_word',
+                                                                  self.han_model.context_vecotor_word)
+            W_w_attention_sentence_histogram = tf.summary.histogram('W_w_attention_sentence',
+                                                                    self.han_model.W_w_attention_sentence)
+            W_b_attention_sentence_histogram = tf.summary.histogram('W_b_attention_sentence',
+                                                                    self.han_model.W_b_attention_sentence)
+            context_vecotor_sentence_histogram = tf.summary.histogram('context_vecotor_sentence',
+                                                                      self.han_model.context_vecotor_sentence)
+            train_variable_histogram = tf.summary.merge([W_w_attention_word_histogram, W_b_attention_word_histogram,
+                                                    context_vecotor_word_histogram, W_w_attention_sentence_histogram,
+                                                W_b_attention_sentence_histogram, context_vecotor_sentence_histogram])
 
             for epoch in range(self.han_config.epoch):
                 batch_iterate = self.batch_iter(X_train, y_train, self.han_config.batch_size)
 
                 for input_x, input_y in batch_iterate:
-                    train_accuracy = session.run(self.han_model.accuracy,
-                            feed_dict={
-                                        self.han_model.learning_rate: self.han_config.learning_rate,
-                                        self.han_model.input_x: input_x,
-                                        self.han_model.input_y: input_y})
-                    # print(train_accuracy.shape)
-
-                    train_loss = session.run(self.han_model.loss,
-                            feed_dict={
-                                        self.han_model.learning_rate: self.han_config.learning_rate,
-                                        self.han_model.input_x: input_x,
-                                        self.han_model.input_y: input_y})
-
                     if steps % self.han_config.num_train == 0:
-                        test_accuracy = session.run(self.han_model.accuracy,
+                        train_accuracy, train_loss, train_scalar_, train_variable_histogram_ = session.run(
+                                                            [self.han_model.accuracy, self.han_model.loss, train_scalar,
+                                                                                 train_variable_histogram],
                                                     feed_dict={
-                                                            self.han_model.learning_rate: self.han_config.learning_rate,
-                                                            self.han_model.input_x: X_val,
-                                                            self.han_model.input_y: y_val})
+                                                        self.han_model.learning_rate: self.han_config.learning_rate,
+                                                        self.han_model.input_x: input_x,
+                                                        self.han_model.input_y: input_y})
 
-                        test_loss = session.run(self.han_model.loss,
-                                                    feed_dict={
+                        test_accuracy, test_loss, test_scalar_ = session.run([self.han_model.accuracy,
+                                                                              self.han_model.loss, test_scalar],
+                                                                             feed_dict={
                                                             self.han_model.learning_rate: self.han_config.learning_rate,
-                                                            self.han_model.input_x: X_val,
-                                                            self.han_model.input_y: y_val})
+                                                                                 self.han_model.input_x: X_val,
+                                                                                 self.han_model.input_y: y_val})
+                        # add train scalar
+                        writer.add_summary(summary=train_scalar_, global_step=steps)
+
+                        # add test scalar
+                        writer.add_summary(summary=test_scalar_, global_step=steps)
+
+                        # add variable histogram
+                        writer.add_summary(summary=train_variable_histogram_, global_step=steps)
 
                         if test_accuracy > best_accuracy:
                             best_accuracy = test_accuracy
@@ -142,10 +167,9 @@ class HierarchicalAttentionTrain(object):
                         if steps - last_improved > self.han_config.require_improved:
                             print("No optimization for a long time, auto-stopping...")
                             logits = session.run(self.han_model.logits,
-                                                 feed_dict={
-                                                     self.han_model.learning_rate: self.han_config.learning_rate,
-                                                     self.han_model.input_x: X_val,
-                                                     self.han_model.input_y: y_val})
+                                                 feed_dict={self.han_model.learning_rate: self.han_config.learning_rate,
+                                                            self.han_model.input_x: X_val,
+                                                            self.han_model.input_y: y_val})
 
                             print(' f1 is {0}'.format(classification_report(np.argmax(y_val, axis=1),
                                                                             np.argmax(logits, axis=1))))
@@ -158,22 +182,20 @@ class HierarchicalAttentionTrain(object):
 
                     # optimize loss
                     session.run(self.han_model.optim,
-                                feed_dict={
-                                           self.han_model.learning_rate: self.han_config.learning_rate,
+                                feed_dict={self.han_model.learning_rate: self.han_config.learning_rate,
                                            self.han_model.input_x: input_x,
                                            self.han_model.input_y: input_y})
 
-                    steps = steps + 1
-
                     if epoch == self.han_config.epoch - 2:
                         logits = session.run(self.han_model.logits,
-                                              feed_dict={
-                                                         self.han_model.learning_rate: self.han_config.learning_rate,
+                                              feed_dict={self.han_model.learning_rate: self.han_config.learning_rate,
                                                          self.han_model.input_x: X_val,
                                                          self.han_model.input_y: y_val})
 
                         print(' f1 is {0}'.format(classification_report(np.argmax(y_val, axis=1),
-                                                                        np.argmax(logits, axis=1))))
+                                                                     np.argmax(logits, axis=1))))
+                    # steps add
+                    steps = steps + 1
 
 if __name__ == "__main__":
     train = HierarchicalAttentionTrain()

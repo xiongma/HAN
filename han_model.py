@@ -148,12 +148,11 @@ class HierarchicalAttention(object):
              expand dimension
              p_attention_expanded:shape [batch_size*num_sentence, sequence_length, 1]
         """
-        p_attention_expanded = tf.expand_dims(p_attention, axis=2)
+        p_attention_expanded = tf.expand_dims(p_attention, axis=2) # 这里求出了注意力的权重
         """
             add probability to hidden_state, shape:[batch_size*num_sentences,sequence_length,hidden_size*2]
         """
-        sentence_representation = tf.multiply(p_attention_expanded,
-                                              hidden_state)
+        sentence_representation = tf.multiply(p_attention_expanded, hidden_state) # 这里将每个词的注意力和隐藏层输出相乘
         """
             shape:[batch_size*num_sentences,hidden_size*2]
         """

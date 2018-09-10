@@ -17,5 +17,6 @@ class HierarchicalAttentionConfig(object):
         self.epoch = 10  # train epoch
         self.train_rate = 0.8 # this is train data set rate of total data set
         self.num_train = 5 # how many number display train accuracy
-        self.model_path = file_path + '/model/HAN.ckpt'
         self.require_improved = 100
+        self.model_path = file_path + '/model/HAN.ckpt'
+        self.log_path = file_path + '/log'
